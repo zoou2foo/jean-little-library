@@ -1,0 +1,124 @@
+### Health Check
+GET http://localhost:5000/
+
+###
+### ── BOOKS ──────────────────────────────────────────
+
+### Get all books
+GET http://localhost:5000/api/books
+
+### Get a single book (id 1 = The Hobbit from seed data)
+GET http://localhost:5000/api/books/1
+
+### Get a book that doesn't exist (expect 404)
+GET http://localhost:5000/api/books/999
+
+### Create a new book
+POST http://localhost:5000/api/books
+Content-Type: application/json
+
+{
+  "title": "The Name of the Wind",
+  "author": "Patrick Rothfuss",
+  "isbn": "978-0756404741"
+}
+
+### Create a book with missing fields (expect 400)
+POST http://localhost:5000/api/books
+Content-Type: application/json
+
+{
+  "title": "No Author Book"
+}
+
+### Update a book (id 3 = The Night Circus)
+PUT http://localhost:5000/api/books/3
+Content-Type: application/json
+
+{
+  "title": "The Night Circus",
+  "author": "Erin Morgenstern",
+  "isbn": "978-0385534635"
+}
+
+### Delete a book that has NO active loans (id 3 = The Night Circus, not loaned)
+DELETE http://localhost:5000/api/books/3
+
+### Delete a book that IS on loan (id 1 = The Hobbit, on loan to Marie — expect 400)
+DELETE http://localhost:5000/api/books/1
+
+###
+### ── PEOPLE ──────────────────────────────────────────
+
+### Get all people
+GET http://localhost:5000/api/people
+
+### Get a single person (id 1 = Marie Tremblay)
+GET http://localhost:5000/api/people/3
+
+### Create a new person
+POST http://localhost:5000/api/people
+Content-Type: application/json
+
+{
+  "name": "Isabelle Roy"
+}
+
+### Create a duplicate person (expect 400)
+POST http://localhost:5000/api/people
+Content-Type: application/json
+
+{
+  "name": "Marie Tremblay"
+}
+
+### Create a person with no name (expect 400)
+POST http://localhost:5000/api/people
+Content-Type: application/json
+
+{}
+
+###
+### ── LOANS ──────────────────────────────────────────
+
+### Get all active loans
+GET http://localhost:5000/api/loans
+
+### Get all loans for Marie (person id 1)
+GET http://localhost:5000/api/loans/person/1
+
+### Create a new loan (Project Hail Mary = book 4, Sophie = person 3)
+POST http://localhost:5000/api/loans
+Content-Type: application/json
+
+{
+  "book_id": 4,
+  "person_id": 3,
+  "borrowed_date": "2026-03-28"
+}
+
+### Try to loan a book already on loan (book 1 = The Hobbit — expect 400)
+POST http://localhost:5000/api/loans
+Content-Type: application/json
+
+{
+  "book_id": 1,
+  "person_id": 3,
+  "borrowed_date": "2026-03-28"
+}
+
+### Mark loan as returned (loan id 2 = Lucas/Dune)
+POST http://localhost:5000/api/loans/2/return
+Content-Type: application/json
+
+{
+  "returned_date": "2026-03-28"
+}
+
+### Try to return an already-returned loan (expect 404)
+POST http://localhost:5000/api/loans/2/return
+Content-Type: application/json
+
+{
+  "returned_date": "2026-03-28"
+}
