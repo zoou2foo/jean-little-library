@@ -5,9 +5,9 @@ const pool = require('../config/database')
 
 const Book = {
 
-  // Get all books in the database.
+  // Get all non-archived books in the database.
   async getAll() {
-	const result = await pool.query('SELECT id, title, author, isbn FROM books ORDER BY title ASC')
+	const result = await pool.query('SELECT id, title, author, isbn FROM books WHERE archived = FALSE ORDER BY title ASC')
 	return result.rows
   },
 
@@ -51,19 +51,36 @@ const Book = {
     return result.rows[0]
   },
 
-  // Delete a book — but only if it has no active loans.
-  // This enforces a business rule at the data layer so no other code can bypass it.
+  // Soft-delete: archive a book instead of removing it.
+  // If the book is currently on loan, block the action entirely.
+  // If it has past loan history, archive it so the history is preserved.
+  // If it has no history at all, hard-delete it since there's nothing to preserve.
   async delete(id) {
-    const loanCheck = await pool.query(
+    // Always block if the book is currently out on loan
+    const activeLoanCheck = await pool.query(
       'SELECT id FROM loans WHERE book_id = $1 AND returned_date IS NULL',
       [id]
     )
-    if (loanCheck.rows.length > 0) {
+    if (activeLoanCheck.rows.length > 0) {
       const error = new Error('Cannot delete a book that is currently on loan')
       error.status = 400
       throw error
     }
 
+    // If the book has past loan history, archive it instead of deleting
+    const historyCheck = await pool.query(
+      'SELECT id FROM loans WHERE book_id = $1',
+      [id]
+    )
+    if (historyCheck.rows.length > 0) {
+      const result = await pool.query(
+        'UPDATE books SET archived = TRUE WHERE id = $1 RETURNING *',
+        [id]
+      )
+      return result.rows[0]
+    }
+
+    // No loan history at all — safe to hard-delete
     const result = await pool.query(
       'DELETE FROM books WHERE id = $1 RETURNING *',
       [id]
