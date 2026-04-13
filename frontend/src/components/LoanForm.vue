@@ -68,7 +68,7 @@ function handleSubmit() {
       <input v-model="borrowedDate" type="date" />
     </label>
 
-    <button type="submit">Log Loan</button>
+    <button type="submit" :disabled="books.length === 0 || people.length === 0">Log Loan</button>
   </form>
 </template>
 
@@ -108,6 +108,11 @@ button {
   border: none;
   border-radius: 4px;
   cursor: pointer;
+}
+
+button:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
 }
 
 .form-error {

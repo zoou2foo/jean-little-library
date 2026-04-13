@@ -5,6 +5,7 @@
 <script setup>
 const props = defineProps({
   book: { type: Object, required: true },
+  isOnLoan: { type: Boolean, default: false },
 })
 
 // emit lets this component tell its parent "the user clicked edit/delete on this book"
@@ -14,7 +15,10 @@ const emit = defineEmits(['edit', 'delete'])
 <template>
   <div class="book-card">
     <div class="book-info">
-      <strong>{{ book.title }}</strong>
+		<div class="title-row">
+			<strong>{{ book.title }}</strong>
+			<span v-if="isOnLoan" class="badge-on-loan">On Loan</span>
+		</div>
       <span class="author">{{ book.author }}</span>
       <span v-if="book.isbn" class="isbn">ISBN: {{ book.isbn }}</span>
     </div>
@@ -34,13 +38,28 @@ const emit = defineEmits(['edit', 'delete'])
   border: 1px solid #ddd;
   border-radius: 6px;
   margin-bottom: 0.5rem;
-  background: #fff;
+  background: #ddd;
 }
 
 .book-info {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
+}
+
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.badge-on-loan {
+  font-size: 0.7rem;
+  background: #e67e22;
+  color: white;
+  padding: 0.15rem 0.5rem;
+  border-radius: 10px;
+  font-weight: 600;
 }
 
 .author {

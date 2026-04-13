@@ -8,6 +8,12 @@ import PersonForm from './PersonForm.vue'
 
 const { people, loading, error, fetchPeople, createPerson, deletePerson } = usePeople()
 const actionError = ref(null)
+const successMessage = ref(null)
+
+function showSuccess(msg) {
+  successMessage.value = msg
+  setTimeout(() => successMessage.value = null, 3000)
+}
 
 onMounted(fetchPeople)
 
@@ -15,6 +21,7 @@ async function handleSubmit(personData) {
   actionError.value = null
   try {
     await createPerson(personData)
+    showSuccess('Person added!')
   } catch (err) {
     actionError.value = err.message
   }
@@ -25,6 +32,7 @@ async function handleDelete(id) {
   actionError.value = null
   try {
     await deletePerson(id)
+    showSuccess('Person removed.')
   } catch (err) {
     actionError.value = err.message
   }
@@ -35,6 +43,7 @@ async function handleDelete(id) {
   <div>
     <PersonForm @submit="handleSubmit" />
 
+    <p v-if="successMessage" class="success-banner">{{ successMessage }}</p>
     <p v-if="actionError" class="action-error">{{ actionError }}</p>
     <p v-if="loading">Loading people...</p>
     <p v-else-if="error" class="action-error">{{ error }}</p>
@@ -79,6 +88,15 @@ async function handleDelete(id) {
 
 .action-error {
   color: #e74c3c;
+  margin-bottom: 0.75rem;
+}
+
+.success-banner {
+  color: #27ae60;
+  background: #eafaf1;
+  border: 1px solid #a9dfbf;
+  border-radius: 4px;
+  padding: 0.5rem 0.75rem;
   margin-bottom: 0.75rem;
 }
 </style>

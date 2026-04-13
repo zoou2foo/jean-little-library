@@ -12,6 +12,12 @@ const { loans, loading, error, fetchLoans, createLoan, returnLoan } = useLoans()
 const { books, fetchBooks } = useBooks()
 const { people, fetchPeople } = usePeople()
 const actionError = ref(null)
+const successMessage = ref(null)
+
+function showSuccess(msg) {
+  successMessage.value = msg
+  setTimeout(() => successMessage.value = null, 3000)
+}
 
 // Fetch all three lists when this component mounts
 onMounted(async () => {
@@ -22,6 +28,7 @@ async function handleSubmit(loanData) {
   actionError.value = null
   try {
     await createLoan(loanData)
+    showSuccess('Loan logged!')
   } catch (err) {
     actionError.value = err.message
   }
@@ -32,6 +39,7 @@ async function handleReturn(loanId) {
   actionError.value = null
   try {
     await returnLoan(loanId)
+    showSuccess('Book marked as returned!')
   } catch (err) {
     actionError.value = err.message
   }
@@ -43,6 +51,7 @@ async function handleReturn(loanId) {
     <LoanForm :books="books" :people="people" @submit="handleSubmit" />
 
     <h3>Active Loans</h3>
+    <p v-if="successMessage" class="success-banner">{{ successMessage }}</p>
     <p v-if="actionError" class="action-error">{{ actionError }}</p>
     <p v-if="loading">Loading loans...</p>
     <p v-else-if="error" class="action-error">{{ error }}</p>
@@ -111,6 +120,15 @@ async function handleReturn(loanId) {
 
 .action-error {
   color: #e74c3c;
+  margin-bottom: 0.75rem;
+}
+
+.success-banner {
+  color: #27ae60;
+  background: #eafaf1;
+  border: 1px solid #a9dfbf;
+  border-radius: 4px;
+  padding: 0.5rem 0.75rem;
   margin-bottom: 0.75rem;
 }
 </style>
